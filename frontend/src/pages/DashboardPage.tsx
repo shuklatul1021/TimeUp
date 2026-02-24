@@ -1,12 +1,6 @@
 import { useState } from "react";
 import {
-  Activity,
   Plus,
-  Bell,
-  Settings,
-  LogOut,
-  ChevronDown,
-  Search,
   ArrowUpRight,
   ArrowDownRight,
   Globe,
@@ -23,10 +17,9 @@ import {
   CheckCircle2,
   XCircle,
   TrendingUp,
-  Users,
   BarChart3,
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   AreaChart,
   Area,
@@ -47,17 +40,14 @@ import {
   CardHeader,
   CardTitle,
 } from "../components/ui/card";
-import { Input } from "../components/ui/input";
-import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../components/ui/dropdown-menu";
-import { Separator } from "../components/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "../components/ui/tabs";
 import {
   Tooltip,
@@ -65,6 +55,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "../components/ui/tooltip";
+import { DashboardLayout } from "../components/DashboardLayout";
 
 // — Mock Data —
 
@@ -415,18 +406,13 @@ function CustomTooltip({
 // — Main Dashboard Component —
 
 export function DashboardPage() {
-  const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | MonitorStatus>(
     "all",
   );
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const filteredMonitors = monitors.filter((m) => {
-    const matchesSearch =
-      m.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      m.url.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === "all" || m.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    return matchesStatus;
   });
 
   const totalUp = monitors.filter((m) => m.status === "up").length;
@@ -442,646 +428,467 @@ export function DashboardPage() {
   );
 
   return (
-    <div className="min-h-screen bg-[#030712] text-white flex">
-      {/* Sidebar */}
-      <motion.aside
-        animate={{ width: sidebarCollapsed ? 72 : 260 }}
-        transition={{ duration: 0.2, ease: "easeInOut" }}
-        className="fixed inset-y-0 left-0 z-40 border-r border-white/5 bg-[#030712]/80 backdrop-blur-xl flex flex-col"
-      >
-        {/* Logo */}
-        <div className="h-16 flex items-center px-4 gap-3 border-b border-white/5 shrink-0">
-          <div className="p-1.5 bg-blue-600 rounded-lg shrink-0">
-            <Activity className="w-5 h-5 text-white" />
-          </div>
-          <AnimatePresence>
-            {!sidebarCollapsed && (
-              <motion.span
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="font-bold text-lg tracking-tight whitespace-nowrap"
-              >
-                TimeUp
-              </motion.span>
-            )}
-          </AnimatePresence>
+    <DashboardLayout
+      title="Dashboard"
+      badge={
+        <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20">
+          All systems operational
+        </Badge>
+      }
+    >
+      <div className="space-y-6">
+        {/* Stats Row */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatCard
+            title="Monitors Up"
+            value={`${totalUp}/${monitors.length}`}
+            change={`${totalDown} down`}
+            changeType={totalDown > 0 ? "negative" : "positive"}
+            icon={CheckCircle2}
+            iconColor="bg-emerald-500/10 text-emerald-400"
+          />
+          <StatCard
+            title="Avg. Uptime"
+            value={`${avgUptime}%`}
+            change="+0.02% this week"
+            changeType="positive"
+            icon={TrendingUp}
+            iconColor="bg-blue-500/10 text-blue-400"
+          />
+          <StatCard
+            title="Avg. Response"
+            value={`${avgResponseTime}ms`}
+            change="-12ms from last week"
+            changeType="positive"
+            icon={Clock}
+            iconColor="bg-purple-500/10 text-purple-400"
+          />
+          <StatCard
+            title="Incidents Today"
+            value={`${recentIncidents.filter((i) => i.startedAt.includes("Today")).length}`}
+            change={`${recentIncidents.filter((i) => !i.resolved).length} unresolved`}
+            changeType={
+              recentIncidents.filter((i) => !i.resolved).length > 0
+                ? "negative"
+                : "neutral"
+            }
+            icon={AlertTriangle}
+            iconColor="bg-amber-500/10 text-amber-400"
+          />
         </div>
 
-        {/* Nav Items */}
-        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-          {[
-            { icon: BarChart3, label: "Dashboard", active: true },
-            { icon: Globe, label: "Monitors", active: false },
-            { icon: AlertTriangle, label: "Incidents", active: false },
-            { icon: Users, label: "Status Pages", active: false },
-            { icon: Bell, label: "Alerts", active: false },
-            { icon: TrendingUp, label: "Analytics", active: false },
-            { icon: Settings, label: "Settings", active: false },
-          ].map((item) => (
-            <TooltipProvider key={item.label}>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                      item.active
-                        ? "bg-blue-600/10 text-blue-400"
-                        : "text-gray-400 hover:text-white hover:bg-white/5"
-                    }`}
-                  >
-                    <item.icon className="w-5 h-5 shrink-0" />
-                    <AnimatePresence>
-                      {!sidebarCollapsed && (
-                        <motion.span
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          className="whitespace-nowrap"
-                        >
-                          {item.label}
-                        </motion.span>
-                      )}
-                    </AnimatePresence>
-                  </button>
-                </TooltipTrigger>
-                {sidebarCollapsed && (
-                  <TooltipContent
-                    side="right"
-                    className="bg-gray-900 border-white/10 text-white"
-                  >
-                    {item.label}
-                  </TooltipContent>
-                )}
-              </Tooltip>
-            </TooltipProvider>
-          ))}
-        </nav>
-
-        {/* Sidebar Footer */}
-        <div className="px-3 py-4 border-t border-white/5 shrink-0">
-          <button
-            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
-          >
-            <ChevronDown
-              className={`w-5 h-5 shrink-0 transition-transform ${sidebarCollapsed ? "rotate-[-90deg]" : "rotate-90"}`}
-            />
-            <AnimatePresence>
-              {!sidebarCollapsed && (
-                <motion.span
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="whitespace-nowrap"
-                >
-                  Collapse
-                </motion.span>
-              )}
-            </AnimatePresence>
-          </button>
-        </div>
-      </motion.aside>
-
-      {/* Main Content */}
-      <motion.main
-        animate={{ marginLeft: sidebarCollapsed ? 72 : 260 }}
-        transition={{ duration: 0.2, ease: "easeInOut" }}
-        className="flex-1 min-h-screen"
-      >
-        {/* Top Bar */}
-        <header className="sticky top-0 z-30 h-16 border-b border-white/5 bg-[#030712]/60 backdrop-blur-xl flex items-center justify-between px-6">
-          <div className="flex items-center gap-4">
-            <h1 className="text-lg font-semibold tracking-tight">Dashboard</h1>
-            <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20">
-              All systems operational
-            </Badge>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-              <Input
-                placeholder="Search monitors..."
-                className="w-64 pl-9 bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus-visible:ring-blue-500 h-9"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
+        {/* 90-Day Uptime Bar */}
+        <Card className="border-white/5 bg-white/[0.02]">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-white text-base">
+                  90-Day Uptime Overview
+                </CardTitle>
+                <CardDescription className="text-gray-400">
+                  Overall system availability across all monitors
+                </CardDescription>
+              </div>
+              <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 text-lg px-3 py-1">
+                {avgUptime}%
+              </Badge>
             </div>
+          </CardHeader>
+          <CardContent>
+            <UptimeBar />
+            <div className="flex items-center justify-between mt-3 text-xs text-gray-500">
+              <span>90 days ago</span>
+              <div className="flex items-center gap-4">
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-sm bg-emerald-500" /> Up
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-sm bg-amber-500" />{" "}
+                  Degraded
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-sm bg-red-500" /> Down
+                </span>
+              </div>
+              <span>Today</span>
+            </div>
+          </CardContent>
+        </Card>
 
-            <Separator orientation="vertical" className="h-6 bg-white/10" />
-
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-gray-400 hover:text-white hover:bg-white/5 relative"
-                  >
-                    <Bell className="w-5 h-5" />
-                    <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent className="bg-gray-900 border-white/10 text-white">
-                  Notifications
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="flex items-center gap-2 hover:bg-white/5 px-2"
-                >
-                  <Avatar className="w-8 h-8">
-                    <AvatarImage src="" />
-                    <AvatarFallback className="bg-blue-600 text-white text-xs">
-                      AT
-                    </AvatarFallback>
-                  </Avatar>
-                  <ChevronDown className="w-4 h-4 text-gray-400" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="end"
-                className="w-56 bg-gray-900 border-white/10 text-white"
-              >
-                <DropdownMenuLabel className="text-gray-400">
-                  My Account
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator className="bg-white/10" />
-                <DropdownMenuItem className="hover:bg-white/5 cursor-pointer focus:bg-white/5">
-                  <Settings className="w-4 h-4 mr-2" /> Settings
-                </DropdownMenuItem>
-                <DropdownMenuItem className="hover:bg-white/5 cursor-pointer focus:bg-white/5">
-                  <Bell className="w-4 h-4 mr-2" /> Notifications
-                </DropdownMenuItem>
-                <DropdownMenuSeparator className="bg-white/10" />
-                <DropdownMenuItem className="hover:bg-white/5 cursor-pointer text-red-400 focus:bg-white/5 focus:text-red-400">
-                  <LogOut className="w-4 h-4 mr-2" /> Log Out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </header>
-
-        {/* Page Content */}
-        <div className="p-6 space-y-6">
-          {/* Stats Row */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard
-              title="Monitors Up"
-              value={`${totalUp}/${monitors.length}`}
-              change={`${totalDown} down`}
-              changeType={totalDown > 0 ? "negative" : "positive"}
-              icon={CheckCircle2}
-              iconColor="bg-emerald-500/10 text-emerald-400"
-            />
-            <StatCard
-              title="Avg. Uptime"
-              value={`${avgUptime}%`}
-              change="+0.02% this week"
-              changeType="positive"
-              icon={TrendingUp}
-              iconColor="bg-blue-500/10 text-blue-400"
-            />
-            <StatCard
-              title="Avg. Response"
-              value={`${avgResponseTime}ms`}
-              change="-12ms from last week"
-              changeType="positive"
-              icon={Clock}
-              iconColor="bg-purple-500/10 text-purple-400"
-            />
-            <StatCard
-              title="Incidents Today"
-              value={`${recentIncidents.filter((i) => i.startedAt.includes("Today")).length}`}
-              change={`${recentIncidents.filter((i) => !i.resolved).length} unresolved`}
-              changeType={
-                recentIncidents.filter((i) => !i.resolved).length > 0
-                  ? "negative"
-                  : "neutral"
-              }
-              icon={AlertTriangle}
-              iconColor="bg-amber-500/10 text-amber-400"
-            />
-          </div>
-
-          {/* 90-Day Uptime Bar */}
-          <Card className="border-white/5 bg-white/[0.02]">
-            <CardHeader className="pb-3">
+        {/* Charts Row */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          {/* Response Time Chart */}
+          <Card className="border-white/5 bg-white/[0.02] lg:col-span-2">
+            <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="text-white text-base">
-                    90-Day Uptime Overview
+                    Response Time
                   </CardTitle>
                   <CardDescription className="text-gray-400">
-                    Overall system availability across all monitors
+                    Average response time across all monitors (24h)
                   </CardDescription>
                 </div>
-                <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 text-lg px-3 py-1">
-                  {avgUptime}%
-                </Badge>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-gray-400 hover:text-white hover:bg-white/5"
+                >
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Refresh
+                </Button>
               </div>
             </CardHeader>
             <CardContent>
-              <UptimeBar />
-              <div className="flex items-center justify-between mt-3 text-xs text-gray-500">
-                <span>90 days ago</span>
-                <div className="flex items-center gap-4">
-                  <span className="flex items-center gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-sm bg-emerald-500" />{" "}
-                    Up
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-sm bg-amber-500" />{" "}
-                    Degraded
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-sm bg-red-500" /> Down
-                  </span>
-                </div>
-                <span>Today</span>
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={responseTimeData}>
+                    <defs>
+                      <linearGradient
+                        id="colorResponse"
+                        x1="0"
+                        y1="0"
+                        x2="0"
+                        y2="1"
+                      >
+                        <stop
+                          offset="5%"
+                          stopColor="#3b82f6"
+                          stopOpacity={0.3}
+                        />
+                        <stop
+                          offset="95%"
+                          stopColor="#3b82f6"
+                          stopOpacity={0}
+                        />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      stroke="rgba(255,255,255,0.05)"
+                      vertical={false}
+                    />
+                    <XAxis
+                      dataKey="time"
+                      stroke="rgba(255,255,255,0.2)"
+                      tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 12 }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
+                    <YAxis
+                      stroke="rgba(255,255,255,0.2)"
+                      tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 12 }}
+                      axisLine={false}
+                      tickLine={false}
+                      unit="ms"
+                    />
+                    <RechartsTooltip content={<CustomTooltip />} />
+                    <Area
+                      type="monotone"
+                      dataKey="value"
+                      stroke="#3b82f6"
+                      strokeWidth={2}
+                      fillOpacity={1}
+                      fill="url(#colorResponse)"
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
               </div>
             </CardContent>
           </Card>
 
-          {/* Charts Row */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            {/* Response Time Chart */}
-            <Card className="border-white/5 bg-white/[0.02] lg:col-span-2">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-white text-base">
-                      Response Time
-                    </CardTitle>
-                    <CardDescription className="text-gray-400">
-                      Average response time across all monitors (24h)
-                    </CardDescription>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-gray-400 hover:text-white hover:bg-white/5"
+          {/* Incidents Chart */}
+          <Card className="border-white/5 bg-white/[0.02]">
+            <CardHeader>
+              <CardTitle className="text-white text-base">
+                Incidents This Week
+              </CardTitle>
+              <CardDescription className="text-gray-400">
+                Incident count per day
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={incidentData}>
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      stroke="rgba(255,255,255,0.05)"
+                      vertical={false}
+                    />
+                    <XAxis
+                      dataKey="day"
+                      stroke="rgba(255,255,255,0.2)"
+                      tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 12 }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
+                    <YAxis
+                      stroke="rgba(255,255,255,0.2)"
+                      tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 12 }}
+                      axisLine={false}
+                      tickLine={false}
+                      allowDecimals={false}
+                    />
+                    <RechartsTooltip
+                      contentStyle={{
+                        backgroundColor: "#111827",
+                        border: "1px solid rgba(255,255,255,0.1)",
+                        borderRadius: "8px",
+                        color: "#fff",
+                        fontSize: "12px",
+                      }}
+                    />
+                    <Bar
+                      dataKey="incidents"
+                      fill="#ef4444"
+                      radius={[4, 4, 0, 0]}
+                      barSize={32}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Monitors Table + Incidents */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          {/* Monitors List */}
+          <Card className="border-white/5 bg-white/[0.02] lg:col-span-2">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-white text-base">
+                    Monitors
+                  </CardTitle>
+                  <CardDescription className="text-gray-400">
+                    {monitors.length} monitors configured
+                  </CardDescription>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Tabs
+                    value={statusFilter}
+                    onValueChange={(v) =>
+                      setStatusFilter(v as "all" | MonitorStatus)
+                    }
                   >
-                    <RefreshCw className="w-4 h-4 mr-2" />
-                    Refresh
+                    <TabsList className="bg-white/5 border border-white/10 h-8">
+                      <TabsTrigger
+                        value="all"
+                        className="text-xs px-2.5 h-6 data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+                      >
+                        All
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="up"
+                        className="text-xs px-2.5 h-6 data-[state=active]:bg-emerald-600 data-[state=active]:text-white"
+                      >
+                        Up
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="down"
+                        className="text-xs px-2.5 h-6 data-[state=active]:bg-red-600 data-[state=active]:text-white"
+                      >
+                        Down
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="degraded"
+                        className="text-xs px-2.5 h-6 data-[state=active]:bg-amber-600 data-[state=active]:text-white"
+                      >
+                        Degraded
+                      </TabsTrigger>
+                    </TabsList>
+                  </Tabs>
+                  <Button
+                    size="sm"
+                    className="bg-blue-600 hover:bg-blue-500 text-white h-8"
+                  >
+                    <Plus className="w-4 h-4 mr-1" /> Add
                   </Button>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <div className="h-64">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={responseTimeData}>
-                      <defs>
-                        <linearGradient
-                          id="colorResponse"
-                          x1="0"
-                          y1="0"
-                          x2="0"
-                          y2="1"
-                        >
-                          <stop
-                            offset="5%"
-                            stopColor="#3b82f6"
-                            stopOpacity={0.3}
-                          />
-                          <stop
-                            offset="95%"
-                            stopColor="#3b82f6"
-                            stopOpacity={0}
-                          />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid
-                        strokeDasharray="3 3"
-                        stroke="rgba(255,255,255,0.05)"
-                        vertical={false}
-                      />
-                      <XAxis
-                        dataKey="time"
-                        stroke="rgba(255,255,255,0.2)"
-                        tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 12 }}
-                        axisLine={false}
-                        tickLine={false}
-                      />
-                      <YAxis
-                        stroke="rgba(255,255,255,0.2)"
-                        tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 12 }}
-                        axisLine={false}
-                        tickLine={false}
-                        unit="ms"
-                      />
-                      <RechartsTooltip content={<CustomTooltip />} />
-                      <Area
-                        type="monotone"
-                        dataKey="value"
-                        stroke="#3b82f6"
-                        strokeWidth={2}
-                        fillOpacity={1}
-                        fill="url(#colorResponse)"
-                      />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Incidents Chart */}
-            <Card className="border-white/5 bg-white/[0.02]">
-              <CardHeader>
-                <CardTitle className="text-white text-base">
-                  Incidents This Week
-                </CardTitle>
-                <CardDescription className="text-gray-400">
-                  Incident count per day
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="h-64">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={incidentData}>
-                      <CartesianGrid
-                        strokeDasharray="3 3"
-                        stroke="rgba(255,255,255,0.05)"
-                        vertical={false}
-                      />
-                      <XAxis
-                        dataKey="day"
-                        stroke="rgba(255,255,255,0.2)"
-                        tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 12 }}
-                        axisLine={false}
-                        tickLine={false}
-                      />
-                      <YAxis
-                        stroke="rgba(255,255,255,0.2)"
-                        tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 12 }}
-                        axisLine={false}
-                        tickLine={false}
-                        allowDecimals={false}
-                      />
-                      <RechartsTooltip
-                        contentStyle={{
-                          backgroundColor: "#111827",
-                          border: "1px solid rgba(255,255,255,0.1)",
-                          borderRadius: "8px",
-                          color: "#fff",
-                          fontSize: "12px",
-                        }}
-                      />
-                      <Bar
-                        dataKey="incidents"
-                        fill="#ef4444"
-                        radius={[4, 4, 0, 0]}
-                        barSize={32}
-                      />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Monitors Table + Incidents */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            {/* Monitors List */}
-            <Card className="border-white/5 bg-white/[0.02] lg:col-span-2">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-white text-base">
-                      Monitors
-                    </CardTitle>
-                    <CardDescription className="text-gray-400">
-                      {monitors.length} monitors configured
-                    </CardDescription>
+              </div>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="divide-y divide-white/5">
+                {filteredMonitors.length === 0 && (
+                  <div className="p-8 text-center text-gray-500">
+                    No monitors match your filter.
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Tabs
-                      value={statusFilter}
-                      onValueChange={(v) =>
-                        setStatusFilter(v as "all" | MonitorStatus)
-                      }
-                    >
-                      <TabsList className="bg-white/5 border border-white/10 h-8">
-                        <TabsTrigger
-                          value="all"
-                          className="text-xs px-2.5 h-6 data-[state=active]:bg-blue-600 data-[state=active]:text-white"
-                        >
-                          All
-                        </TabsTrigger>
-                        <TabsTrigger
-                          value="up"
-                          className="text-xs px-2.5 h-6 data-[state=active]:bg-emerald-600 data-[state=active]:text-white"
-                        >
-                          Up
-                        </TabsTrigger>
-                        <TabsTrigger
-                          value="down"
-                          className="text-xs px-2.5 h-6 data-[state=active]:bg-red-600 data-[state=active]:text-white"
-                        >
-                          Down
-                        </TabsTrigger>
-                        <TabsTrigger
-                          value="degraded"
-                          className="text-xs px-2.5 h-6 data-[state=active]:bg-amber-600 data-[state=active]:text-white"
-                        >
-                          Degraded
-                        </TabsTrigger>
-                      </TabsList>
-                    </Tabs>
-                    <Button
-                      size="sm"
-                      className="bg-blue-600 hover:bg-blue-500 text-white h-8"
-                    >
-                      <Plus className="w-4 h-4 mr-1" /> Add
-                    </Button>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="p-0">
-                <div className="divide-y divide-white/5">
-                  {filteredMonitors.length === 0 && (
-                    <div className="p-8 text-center text-gray-500">
-                      No monitors match your filter.
+                )}
+                {filteredMonitors.map((monitor, index) => (
+                  <motion.div
+                    key={monitor.id}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.04 }}
+                    className="flex items-center px-6 py-4 hover:bg-white/[0.02] transition-colors group"
+                  >
+                    {/* Status dot */}
+                    <div className="mr-4">
+                      <div
+                        className={`w-2.5 h-2.5 rounded-full ${statusColor(monitor.status)} ${
+                          monitor.status === "up"
+                            ? "animate-pulse"
+                            : monitor.status === "down"
+                              ? "animate-ping-slow"
+                              : ""
+                        }`}
+                      />
                     </div>
-                  )}
-                  {filteredMonitors.map((monitor, index) => (
-                    <motion.div
-                      key={monitor.id}
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.04 }}
-                      className="flex items-center px-6 py-4 hover:bg-white/[0.02] transition-colors group"
-                    >
-                      {/* Status dot */}
-                      <div className="mr-4">
-                        <div
-                          className={`w-2.5 h-2.5 rounded-full ${statusColor(monitor.status)} ${
-                            monitor.status === "up"
-                              ? "animate-pulse"
-                              : monitor.status === "down"
-                                ? "animate-ping-slow"
-                                : ""
-                          }`}
-                        />
-                      </div>
 
-                      {/* Info */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          {typeIcon(monitor.type)}
-                          <span className="font-medium text-white text-sm truncate">
-                            {monitor.name}
-                          </span>
-                          {statusBadge(monitor.status)}
-                        </div>
-                        <p className="text-xs text-gray-500 mt-0.5 truncate">
-                          {monitor.url}
+                    {/* Info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        {typeIcon(monitor.type)}
+                        <span className="font-medium text-white text-sm truncate">
+                          {monitor.name}
+                        </span>
+                        {statusBadge(monitor.status)}
+                      </div>
+                      <p className="text-xs text-gray-500 mt-0.5 truncate">
+                        {monitor.url}
+                      </p>
+                    </div>
+
+                    {/* Stats */}
+                    <div className="hidden md:flex items-center gap-8 mr-4">
+                      <div className="text-right">
+                        <p className="text-xs text-gray-500">Uptime</p>
+                        <p
+                          className={`text-sm font-medium ${
+                            monitor.uptime >= 99.9
+                              ? "text-emerald-400"
+                              : monitor.uptime >= 99
+                                ? "text-amber-400"
+                                : "text-red-400"
+                          }`}
+                        >
+                          {monitor.uptime}%
                         </p>
                       </div>
-
-                      {/* Stats */}
-                      <div className="hidden md:flex items-center gap-8 mr-4">
-                        <div className="text-right">
-                          <p className="text-xs text-gray-500">Uptime</p>
-                          <p
-                            className={`text-sm font-medium ${
-                              monitor.uptime >= 99.9
-                                ? "text-emerald-400"
-                                : monitor.uptime >= 99
-                                  ? "text-amber-400"
-                                  : "text-red-400"
-                            }`}
-                          >
-                            {monitor.uptime}%
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-xs text-gray-500">Response</p>
-                          <p className="text-sm font-medium text-white">
-                            {monitor.responseTime > 0
-                              ? `${monitor.responseTime}ms`
-                              : "—"}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-xs text-gray-500">Last Check</p>
-                          <p className="text-sm text-gray-300">
-                            {monitor.lastChecked}
-                          </p>
-                        </div>
+                      <div className="text-right">
+                        <p className="text-xs text-gray-500">Response</p>
+                        <p className="text-sm font-medium text-white">
+                          {monitor.responseTime > 0
+                            ? `${monitor.responseTime}ms`
+                            : "—"}
+                        </p>
                       </div>
+                      <div className="text-right">
+                        <p className="text-xs text-gray-500">Last Check</p>
+                        <p className="text-sm text-gray-300">
+                          {monitor.lastChecked}
+                        </p>
+                      </div>
+                    </div>
 
-                      {/* Actions */}
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-white hover:bg-white/5 transition-all h-8 w-8"
-                          >
-                            <MoreVertical className="w-4 h-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent
-                          align="end"
-                          className="bg-gray-900 border-white/10 text-white"
+                    {/* Actions */}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-white hover:bg-white/5 transition-all h-8 w-8"
                         >
-                          <DropdownMenuItem className="hover:bg-white/5 cursor-pointer focus:bg-white/5">
-                            <ExternalLink className="w-4 h-4 mr-2" /> Visit URL
-                          </DropdownMenuItem>
-                          <DropdownMenuItem className="hover:bg-white/5 cursor-pointer focus:bg-white/5">
-                            <Edit className="w-4 h-4 mr-2" /> Edit Monitor
-                          </DropdownMenuItem>
-                          <DropdownMenuItem className="hover:bg-white/5 cursor-pointer focus:bg-white/5">
-                            <Pause className="w-4 h-4 mr-2" /> Pause
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator className="bg-white/10" />
-                          <DropdownMenuItem className="hover:bg-white/5 cursor-pointer text-red-400 focus:bg-white/5 focus:text-red-400">
-                            <Trash2 className="w-4 h-4 mr-2" /> Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </motion.div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+                          <MoreVertical className="w-4 h-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent
+                        align="end"
+                        className="bg-gray-900 border-white/10 text-white"
+                      >
+                        <DropdownMenuItem className="hover:bg-white/5 cursor-pointer focus:bg-white/5">
+                          <ExternalLink className="w-4 h-4 mr-2" /> Visit URL
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="hover:bg-white/5 cursor-pointer focus:bg-white/5">
+                          <Edit className="w-4 h-4 mr-2" /> Edit Monitor
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="hover:bg-white/5 cursor-pointer focus:bg-white/5">
+                          <Pause className="w-4 h-4 mr-2" /> Pause
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator className="bg-white/10" />
+                        <DropdownMenuItem className="hover:bg-white/5 cursor-pointer text-red-400 focus:bg-white/5 focus:text-red-400">
+                          <Trash2 className="w-4 h-4 mr-2" /> Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </motion.div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
 
-            {/* Recent Incidents */}
-            <Card className="border-white/5 bg-white/[0.02]">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-white text-base">
-                      Recent Incidents
-                    </CardTitle>
-                    <CardDescription className="text-gray-400">
-                      Latest alerts & issues
-                    </CardDescription>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-blue-400 hover:text-blue-300 hover:bg-white/5 text-xs"
-                  >
-                    View All
-                  </Button>
+          {/* Recent Incidents */}
+          <Card className="border-white/5 bg-white/[0.02]">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-white text-base">
+                    Recent Incidents
+                  </CardTitle>
+                  <CardDescription className="text-gray-400">
+                    Latest alerts & issues
+                  </CardDescription>
                 </div>
-              </CardHeader>
-              <CardContent className="p-0">
-                <div className="divide-y divide-white/5">
-                  {recentIncidents.map((incident) => (
-                    <div
-                      key={incident.id}
-                      className="px-6 py-4 hover:bg-white/[0.02] transition-colors"
-                    >
-                      <div className="flex items-start gap-3">
-                        <div className="mt-0.5">
-                          {incident.type === "downtime" ? (
-                            <XCircle className="w-4 h-4 text-red-400" />
-                          ) : incident.type === "degraded" ? (
-                            <AlertTriangle className="w-4 h-4 text-amber-400" />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-blue-400 hover:text-blue-300 hover:bg-white/5 text-xs"
+                >
+                  View All
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="divide-y divide-white/5">
+                {recentIncidents.map((incident) => (
+                  <div
+                    key={incident.id}
+                    className="px-6 py-4 hover:bg-white/[0.02] transition-colors"
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="mt-0.5">
+                        {incident.type === "downtime" ? (
+                          <XCircle className="w-4 h-4 text-red-400" />
+                        ) : incident.type === "degraded" ? (
+                          <AlertTriangle className="w-4 h-4 text-amber-400" />
+                        ) : (
+                          <Shield className="w-4 h-4 text-blue-400" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-sm text-white">
+                            {incident.monitorName}
+                          </span>
+                          {incident.resolved ? (
+                            <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 text-[10px] px-1.5 py-0">
+                              Resolved
+                            </Badge>
                           ) : (
-                            <Shield className="w-4 h-4 text-blue-400" />
+                            <Badge className="bg-red-500/10 text-red-400 border-red-500/20 text-[10px] px-1.5 py-0">
+                              Active
+                            </Badge>
                           )}
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium text-sm text-white">
-                              {incident.monitorName}
-                            </span>
-                            {incident.resolved ? (
-                              <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 text-[10px] px-1.5 py-0">
-                                Resolved
-                              </Badge>
-                            ) : (
-                              <Badge className="bg-red-500/10 text-red-400 border-red-500/20 text-[10px] px-1.5 py-0">
-                                Active
-                              </Badge>
-                            )}
-                          </div>
-                          <p className="text-xs text-gray-400 mt-1 truncate">
-                            {incident.message}
-                          </p>
-                          <div className="flex items-center gap-3 mt-2 text-[11px] text-gray-500">
-                            <span>{incident.startedAt}</span>
-                            <span>·</span>
-                            <span>{incident.duration}</span>
-                          </div>
+                        <p className="text-xs text-gray-400 mt-1 truncate">
+                          {incident.message}
+                        </p>
+                        <div className="flex items-center gap-3 mt-2 text-[11px] text-gray-500">
+                          <span>{incident.startedAt}</span>
+                          <span>·</span>
+                          <span>{incident.duration}</span>
                         </div>
                       </div>
                     </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </div>
-      </motion.main>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 }
