@@ -4,3 +4,7 @@ use serde::{Deserialize, Serialize};
 pub struct CreateWebsiteRequest {
     pub url: String,
 }
+pub struct CreateUserAuthRequest {
+    pub username: String,
+    pub password: String,
+}

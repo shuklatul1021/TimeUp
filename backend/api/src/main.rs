@@ -1,6 +1,6 @@
-use poem::{Route, Server, get, handler, listener::TcpListener, post, web::{Json, Path}};
+use poem::{Route, Server, get, handler, listener::TcpListener, post, web::{Data, Json, Path}};
 use store::store::Store;
-use crate::{request_input::CreateWebsiteRequest, request_output::CreateWebsiteResponse};
+use crate::{request_input::{CreateUserAuthRequest, CreateWebsiteRequest}, request_output::CreateWebsiteResponse};
 
 pub mod request_input;
 pub mod request_output;
@@ -17,10 +17,24 @@ fn create_website(Json(data) : Json<CreateWebsiteRequest>) -> Json<CreateWebsite
     let url = data.url;
     return Json(CreateWebsiteResponse { id: String::from("12345") });
 }
+#[handler]
+fn register_user(Json(data) : Json<CreateUserAuthRequest>) -> Json<CreateWebsiteResponse> {
+    let username = data.username;
+    let password = data.password;
+    return Json(CreateWebsiteResponse { id: String::from("12345") });
+}
+#[handler]
+fn login_user(Json(data) : Json<CreateUserAuthRequest>) -> Json<CreateWebsiteResponse> {
+    let username = data.username;
+    let password = data.password;
+    return Json(CreateWebsiteResponse { id: String::from("12345") });
+}
 
 #[tokio::main]
 async fn main() -> Result<(), std::io::Error> {
     let app = Route::new()
+        .at("/auth/register", post(register_user))
+        .at("/auth/log-in", post(login_user))
         .at("/website/:website_id", get(get_website))
         .at("/website", post(create_website));
 
