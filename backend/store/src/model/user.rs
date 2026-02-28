@@ -1,6 +1,6 @@
 use diesel::{prelude::*};
 use uuid::Uuid;
-use crate::{schema::user::username, store::Store};
+use crate::{store::Store};
 
 
 #[derive(Queryable, Selectable, Insertable)]
@@ -33,7 +33,8 @@ impl Store {
         
     } 
     pub fn login(&mut self , input_username : String , input_password : String) -> Result<bool , diesel::result::Error> {
-        let users = crate::schema::user::table
+        use crate::schema::user::dsl::*;
+        let users = user
             .filter(username.eq(input_username))
             .select(User::as_select())
             .load(&mut self.connect)
