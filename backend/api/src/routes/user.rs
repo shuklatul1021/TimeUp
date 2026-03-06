@@ -29,8 +29,8 @@ pub fn login_user(Json(data) : Json<CreateUserAuthRequest>, Data(s) : Data<&Arc<
     let mut s = s.lock().unwrap();
     let result = s.login(data.username, data.password);
     let now = Utc::now().naive_utc();
-    let expiration = (now + Duration::hours(24)).timestamp() as usize; // Token expires in 24 hour
-    let issued_at = now.timestamp() as usize;
+    let expiration = (now + Duration::hours(24)).and_utc().timestamp() as usize; // Token expires in 24 hour
+    let issued_at = now.and_utc().timestamp() as usize;
     match result {
         Ok(success) => {
             if success.0 {
