@@ -8,6 +8,7 @@ pub struct CreateWebsiteResponse {
 pub struct CreateUserRegestrationResponse {
     pub message: String,
     pub success: bool,
+    pub id : Option<String>
 }
 #[derive(Serialize, Deserialize)]
 pub struct CreateUserLogedInResponse {
