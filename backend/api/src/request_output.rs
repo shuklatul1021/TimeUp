@@ -14,3 +14,10 @@ pub struct CreateUserRegestrationResponse {
 pub struct CreateUserLogedInResponse {
     pub token: String,
 }
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Claims {
+    pub sub: String, // Subject (user ID, etc.)
+    pub exp: usize,  // Expiration time
+    pub iat: usize,  // Issued at time
+}
