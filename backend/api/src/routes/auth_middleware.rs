@@ -1,12 +1,14 @@
 use jsonwebtoken::{decode, DecodingKey, Validation};
 use poem::{FromRequest, Request, RequestBody, Result};
-
 use crate::request_output::Claims;
 
-pub struct UserConfig(String);
+pub struct UserConfig(pub String);
 
 impl<'a> FromRequest<'a> for UserConfig {
-    async fn from_request(req: &'a Request, body: &mut RequestBody) -> Result<Self> {
+    async fn from_request(
+        req: &'a Request, 
+        _body: &mut RequestBody
+    ) -> Result<Self> {
         let secret = b"atulshukla_secret_key";
         let token = req
             .headers()

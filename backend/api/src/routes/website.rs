@@ -1,7 +1,7 @@
 use std::sync::{Arc, Mutex};
 
 use poem::{handler, web::{ Data, Json, Path}};
-use store::{model::user, store::Store};
+use store::{store::Store};
 use crate::{request_input::CreateWebsiteRequest, request_output::CreateWebsiteResponse, routes::auth_middleware::UserConfig};
 
 #[handler]
@@ -11,9 +11,11 @@ pub fn get_website(
     UserConfig(user_config) : UserConfig
 ) -> String {
     let mut s = s.lock().unwrap();
+    println!("User ID from token: {}", user_config);
     let web = s.get_website(name).unwrap();
     return format!("Hello, {}", web.id);
 } 
+
 #[handler]
 pub fn create_website(
     Json(data) : Json<CreateWebsiteRequest>, 
