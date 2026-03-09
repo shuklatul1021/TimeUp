@@ -552,7 +552,7 @@ export function LandingPage() {
         </div>
 
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center pt-8 border-t border-white/5">
-          <p>© 2024 Better Up Time Inc. All rights reserved.</p>
+          <p>© 2024 TimeUp Inc. All rights reserved.</p>
           <div className="flex gap-6 mt-4 md:mt-0">
             {/* Social icons placeholders */}
             <div className="w-5 h-5 bg-white/10 rounded-full hover:bg-blue-500 transition-colors cursor-pointer"></div>

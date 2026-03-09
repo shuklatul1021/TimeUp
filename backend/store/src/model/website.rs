@@ -38,7 +38,14 @@ impl Store {
         let web = website.filter(id.eq(input_id))
             .select(Website::as_select())
             .first(&mut self.connect)?;
-        Ok(web)
-            
+        Ok(web)     
+    }
+
+    pub fn fetch_all_websites(&mut self) -> Result<Vec<Website>, diesel::result::Error> {
+        use crate::schema::website::dsl::*;
+        let web = website
+            .select(Website::as_select())
+            .load(&mut self.connect)?;
+        Ok(web)     
     }
 }
