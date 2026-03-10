@@ -12,6 +12,11 @@ A modern, full-stack uptime monitoring application that tracks website availabil
 - **Status Pages** - Public status pages for your services
 - **Alerts** - Get notified when your websites go down
 
+## Architectural Design
+
+<img width="1273" height="787" alt="chrome_MuUQKXY1IT" src="https://github.com/user-attachments/assets/e9c6f37e-707c-4960-b5d0-48af9fe30eed" />
+
+
 ## Tech Stack
 
 ### Backend (Rust)
