@@ -1,3 +1,8 @@
-fn main() {
-    println!("Hello, world!");
+use redis::{Client, RedisResult};
+
+#[tokio::main]
+async fn main() -> RedisResult<()> {
+ 
+
+    Ok(())
 }

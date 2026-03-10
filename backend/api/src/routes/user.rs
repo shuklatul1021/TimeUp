@@ -8,7 +8,10 @@ use chrono::Duration;
 use crate::{request_input::CreateUserAuthRequest, request_output::{Claims, CreateUserLogedInResponse, CreateUserRegestrationResponse}};
 
 #[handler]
-pub fn register_user(Json(data) : Json<CreateUserAuthRequest> ,  Data(s) : Data<&Arc<Mutex<Store>>>) -> Result<Json<CreateUserRegestrationResponse>, Error> {
+pub fn register_user(
+    Json(data) : Json<CreateUserAuthRequest>,  
+    Data(s) : Data<&Arc<Mutex<Store>>>
+) -> Result<Json<CreateUserRegestrationResponse>, Error> {
     let mut s = s.lock().unwrap();
     let result = s.register(data.username, data.password);
     match result {
@@ -25,7 +28,10 @@ pub fn register_user(Json(data) : Json<CreateUserAuthRequest> ,  Data(s) : Data<
 }
 
 #[handler]
-pub fn login_user(Json(data) : Json<CreateUserAuthRequest>, Data(s) : Data<&Arc<Mutex<Store>>>) -> Result<Json<CreateUserLogedInResponse>, Error> {
+pub fn login_user(
+    Json(data) : Json<CreateUserAuthRequest>, 
+    Data(s) : Data<&Arc<Mutex<Store>>>
+) -> Result<Json<CreateUserLogedInResponse>, Error> {
     let mut s = s.lock().unwrap();
     let result = s.login(data.username, data.password);
     let now = Utc::now().naive_utc();

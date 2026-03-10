@@ -1338,6 +1338,10 @@ dependencies = [
 [[package]]
 name = "producer"
 version = "0.1.0"
+dependencies = [
+ "redis 0.26.1",
+ "tokio",
+]
 
 [[package]]
 name = "quote"
@@ -2422,6 +2426,10 @@ dependencies = [
 [[package]]
 name = "worker"
 version = "0.1.0"
+dependencies = [
+ "redis 0.26.1",
+ "tokio",
+]
 
 [[package]]
 name = "writeable"

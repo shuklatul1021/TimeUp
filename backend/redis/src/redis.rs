@@ -1,17 +1,14 @@
-use redis::{AsyncCommands, Client, Commands, RedisError, aio::MultiplexedConnection};
-use store::store::Store;
+use redis::{Client, RedisError, aio::MultiplexedConnection};
 
 pub struct RedisStream {
-    pub client: MultiplexedConnection,
-    pub db: Store,
+    pub client: MultiplexedConnection
 }
 
 impl RedisStream {
     pub async fn new() -> Result<Self, RedisError> {
-        let config  = Client::open("redis://127.0.0.1:6379/")?;
-        let mut client = config.get_multiplexed_async_connection().await?;
-        let db = Store::default().unwrap();
+        let config  = Client::open("redis://localhost:6379/")?;
+        let client = config.get_multiplexed_async_connection().await?;
 
-        Ok(Self { client , db })
+        Ok(Self { client })
     }
 }
