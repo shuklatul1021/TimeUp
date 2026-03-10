@@ -9,7 +9,6 @@ pub mod request_input;
 pub mod request_output;
 pub mod routes;
 
-
 #[tokio::main]
 async fn main() -> Result<(), std::io::Error> {
     let s = Arc::new(Mutex::new(Store::default().unwrap()));
