@@ -6,4 +6,5 @@ edition = "2024"
 [dependencies]
 tokio =  { version = "1", features = ["full"] }
 redis = { version = "0.26.0", features = ["tokio-comp"] }
-redisStream = { path = "../redisStream"}
+redisstream = { path = "../redisstream"}
+store = { path = "../store"}

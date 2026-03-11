@@ -1339,7 +1339,9 @@ dependencies = [
 name = "producer"
 version = "0.1.0"
 dependencies = [
- "redis 0.26.1",
+ "redis",
+ "redisstream",
+ "store",
  "tokio",
 ]
 
@@ -1390,14 +1392,6 @@ dependencies = [
 
 [[package]]
 name = "redis"
-version = "0.1.0"
-dependencies = [
- "redis 0.26.1",
- "store",
-]
-
-[[package]]
-name = "redis"
 version = "0.26.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e902a69d09078829137b4a5d9d082e0490393537badd7c91a3d69d14639e115f"
@@ -1417,6 +1411,14 @@ dependencies = [
  "tokio",
  "tokio-util",
  "url",
+]
+
+[[package]]
+name = "redisstream"
+version = "0.1.0"
+dependencies = [
+ "redis",
+ "store",
 ]
 
 [[package]]
@@ -2427,7 +2429,8 @@ dependencies = [
 name = "worker"
 version = "0.1.0"
 dependencies = [
- "redis 0.26.1",
+ "redis",
+ "redisstream",
  "tokio",
 ]
 
