@@ -1,4 +1,7 @@
-use redis::{AsyncCommands, RedisError, streams::{StreamReadOptions, StreamReadReply}};
+use redis::{
+    AsyncCommands, RedisError,
+    streams::{StreamReadOptions, StreamReadReply},
+};
 
 use crate::redis::RedisStream;
 
@@ -20,28 +23,15 @@ impl RedisStream {
         }
     }
 
-    pub async fn x_read_group_website(&mut self) -> Result<String, RedisError> {
+    pub async fn x_read_group_website(&mut self) -> Result<StreamReadReply, RedisError> {
         let option: StreamReadOptions = StreamReadOptions::default()
             .group("india", "india-worker-1")
             .count(10)
-            .block(0);
-        let reply : StreamReadReply = self
+            .block(5000);
+        let reply: StreamReadReply = self
             .client
             .xread_options(&["uptime:website"], &[">"], &option)
             .await?;
-
-        for key in reply.keys {
-            for id in &key.ids {
-                // TODO: Process the message (id.map has the fields)
-                println!("Got message: {}", id.id);
-
-                // ACK so Redis doesn't redeliver
-                let _: i64 = self.client
-                    .xack("uptime:website", "india", &[&id.id])
-                    .await?;
-            }
-        }
-
-        Ok(String::from("Success"))
+        Ok(reply)
     }
 }

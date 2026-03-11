@@ -19,9 +19,13 @@ pub fn get_website(
 #[handler]
 pub fn create_website(
     Json(data) : Json<CreateWebsiteRequest>, 
-    Data(s) : Data<&Arc<Mutex<Store>>>
+    Data(s) : Data<&Arc<Mutex<Store>>>,
+    UserConfig(user_config) : UserConfig
 ) -> Json<CreateWebsiteResponse> {
-    let mut _s = s.lock().unwrap();
-    println!("Creating website with URL: {}", data.url);
-    return Json(CreateWebsiteResponse { id: String::from("12345") });
+    let mut s = s.lock().unwrap();
+    let res = s.create_website(user_config, data.url);
+    match res {
+        Ok(web) => return Json(CreateWebsiteResponse { id : web.id }),
+        Err(_e) => return Json(CreateWebsiteResponse { id: String::from("Error creating website") }),
+    }
 }
