@@ -6,18 +6,18 @@ use crate::redis::RedisStream;
 impl RedisStream {
     pub async fn x_add_bulk(
         &mut self,
-        websites : Vec<Website> 
+        websites : &[Website]
     ) -> Result<String, RedisError> {
         for web in websites {
             let _: () = self.client
                         .xadd(
-                            "timeup",
+                            "uptime:website",
                             "*", 
                             &[
-                                        ("id", web.id), 
-                                        ("url", web.url), 
-                                        ("user_id", web.user_id), 
-                                        ("time_added", web.time_added.to_string())
+                                        ("id", &web.id), 
+                                        ("url", &web.url), 
+                                        ("user_id", &web.user_id), 
+                                        ("time_added", &web.time_added.to_string())
                                     ]
                             ).await?;
         }

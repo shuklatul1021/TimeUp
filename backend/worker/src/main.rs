@@ -1,10 +1,14 @@
-use redis::{Client, RedisResult};
+use redis::{RedisResult};
 use redisstream::redis::RedisStream;
 
 
 #[tokio::main]
 async fn main() -> RedisResult<()> {
-    let producer_client = RedisStream::new().await?;
+    let mut producer_client = RedisStream::new().await?;
+
+    producer_client.create_consumer_group().await?;
     
-    Ok(())
+    loop {
+        producer_client.x_read_group_website().await?;
+    }
 }
