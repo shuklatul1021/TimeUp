@@ -13,7 +13,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut producer_client = RedisStream::new().await?;
     let mut db_client = Store::default()?;
     let websites = db_client.fetch_all_websites()?;
-    let mut interval = time::interval(Duration::from_secs(60));
+    let mut interval = time::interval(Duration::from_secs(160));
     for web in websites.iter() {
         println!("Fetched website from DB: {}", web.url);
     }

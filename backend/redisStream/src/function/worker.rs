@@ -1,3 +1,5 @@
+use std::string;
+
 use redis::{
     AsyncCommands, RedisError,
     streams::{StreamReadOptions, StreamReadReply},
@@ -33,5 +35,11 @@ impl RedisStream {
             .xread_options(&["uptime:website"], &[">"], &option)
             .await?;
         Ok(reply)
+    }
+
+    pub async fn x_ack(&mut self, id: String) -> Result<(), RedisError> {
+        print!("The StreamId Acknowledge {}" , id);
+        self.client.xack("uptime:website", "india", &[id]).await
+        
     }
 }

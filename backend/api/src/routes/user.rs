@@ -47,7 +47,7 @@ pub fn login_user(
                     exp: expiration,
                     iat: issued_at,
                 };
-                let secret = b"atulshukla_secret_key"; // In production, use a secure and private key
+                let secret = b"atulshukla_secret_key"; 
                 let header = Header::default();
                 let encoding_key = EncodingKey::from_secret(secret);
 
