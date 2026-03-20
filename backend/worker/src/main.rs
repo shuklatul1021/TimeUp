@@ -44,7 +44,7 @@ async fn run_worker(client: &mut RedisStream, db_client: &mut Store) -> RedisRes
 
                         let duration = start.elapsed();
                         let duration_ms = duration.as_millis().min(i32::MAX as u128) as i32;
-                        let region = String::from("c7f07ba3-e94d-47cd-8428-dcc35e1f659c");
+                        let region = String::from("42b76295-7844-46f3-9a0e-9d14d5159c4c");
                         let update_db =
                             db_client.add_website_tick(id_str, status, duration_ms, region);
 

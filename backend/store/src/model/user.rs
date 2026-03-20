@@ -1,4 +1,4 @@
-use crate::store::Store;
+use crate::{schema::user::email, store::Store};
 use diesel::prelude::*;
 use uuid::Uuid;
 
@@ -8,21 +8,19 @@ use uuid::Uuid;
 
 struct User {
     id: String,
-    username: String,
+    email : String,
     password: String,
 }
 
 impl Store {
     pub fn register(
         &mut self,
-        input_username: String,
-        input_password: String,
+        input_email: String,
     ) -> Result<String, diesel::result::Error> {
         let id = Uuid::new_v4();
         let u = User {
             id: id.to_string(),
-            username: input_username,
-            password: input_password,
+            email : email,
         };
 
         diesel::insert_into(crate::schema::user::table)

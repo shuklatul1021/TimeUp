@@ -6,7 +6,11 @@ pub struct CreateWebsiteRequest {
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct CreateUserAuthRequest {
-    pub username: String,
-    pub password: String,
+pub struct UserAuthStructureRequest{
+    pub email : String
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct UserVerifyStructureRequest{
+    pub token : String
 }

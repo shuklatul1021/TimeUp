@@ -16,7 +16,8 @@ diesel::table! {
 diesel::table! {
     user (id) {
         id -> Text,
-        username -> Text,
+        email -> Text,
+        username -> Nullable<Text>,
         password -> Text,
     }
 }
@@ -25,8 +26,8 @@ diesel::table! {
     website (id) {
         id -> Text,
         url -> Text,
-        time_added -> Timestamp,
         user_id -> Text,
+        time_added -> Timestamp,
     }
 }
 
